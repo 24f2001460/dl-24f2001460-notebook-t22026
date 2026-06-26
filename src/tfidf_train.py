@@ -1,6 +1,5 @@
 import os
 import joblib
-import wandb
 from sklearn.model_selection import train_test_split
 
 from src.tfidf_preprocess import load_data, expand_mcq_rows
@@ -21,9 +20,7 @@ RANDOM_STATE = 42
 
 def main():
     # 1. W&B login & init
-    if WANDB_KEY:
-        wandb.login(key=WANDB_KEY)
-    wandb.init(project=WANDB_PROJECT, name=WANDB_RUN)
+
 
     # 2. Load & expand data
     train_df, _ = load_data(TRAIN_PATH, TEST_PATH)
@@ -53,8 +50,6 @@ def main():
     print(f"MAP@3 on validation set: {score:.4f}")
 
     # 7. Log metrics
-    wandb.log({"map@3": score})
-    wandb.finish()
 
     # 8. Save artefacts
     joblib.dump({'vectorizer': vectorizer, 'model': model}, MODEL_OUT)
