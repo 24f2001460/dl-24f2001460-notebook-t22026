@@ -2,7 +2,7 @@ import argparse
 import joblib
 import pandas as pd
 
-from tfidf_preprocess import OPTIONS
+from src.tfidf_preprocess import OPTIONS
 
 
 def load_artefacts(model_path: str):
