@@ -28,10 +28,14 @@ def predict(test_df: pd.DataFrame, vectorizer, model) -> pd.DataFrame:
     proba = model.predict_proba(X_test_tfidf)[:, 1]
     expanded['score'] = proba
 
-    # Pick the option with the highest score per question id
-    best = expanded.loc[expanded.groupby('id')['score'].idxmax(), ['id', 'option']]
-    best = best.rename(columns={'option': 'answer'}).reset_index(drop=True)
-    return best
+    # Rank options by score per question, return top 3 space-separated
+    def rank_options(group):
+        ranked = group.sort_values('score', ascending=False)['option'].tolist()
+        return ' '.join(ranked[:3])  # top 3 options ranked by confidence
+
+    result = expanded.groupby('id').apply(rank_options).reset_index()
+    result.columns = ['ID', 'Prediction']
+    return result
 
 
 def main():
