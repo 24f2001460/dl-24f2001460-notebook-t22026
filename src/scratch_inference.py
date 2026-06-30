@@ -6,7 +6,7 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-from scratch_preprocess import expand_test_rows, encode_texts, MAX_LEN
+from .scratch_preprocess import expand_test_rows, encode_texts, MAX_LEN
 from models.scratch import build_model
 
 

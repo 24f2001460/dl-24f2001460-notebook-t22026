@@ -9,7 +9,7 @@ import wandb
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 
-from scratch_preprocess import (
+from .scratch_preprocess import (
     expand_train_rows,
     build_vocab,
     encode_texts,
@@ -20,6 +20,8 @@ from scratch_preprocess import (
 from models.scratch import build_model
 
 # ── Config ────────────────────────────────────────────────────────────────────
+TRAIN_PATH = "..data/train.csv"
+TEST_PATH  = "..data/test.csv"
 TRAIN_PATH   = os.getenv('TRAIN_PATH',  '/kaggle/input/competitions/smart-mcq-solver-challenge/train.csv')
 TEST_PATH    = os.getenv('TEST_PATH',   '/kaggle/input/competitions/smart-mcq-solver-challenge/test.csv')
 MODEL_OUT    = os.getenv('MODEL_OUT',   '/kaggle/working/model.pt')
