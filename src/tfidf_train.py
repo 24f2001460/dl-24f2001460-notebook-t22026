@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 
 from src.tfidf_preprocess import load_data, expand_mcq_rows
 from src.tfidf_utils import mapk as compute_mapk
-from models.tfidf import build_vectorizer, build_model
+from models.tfidf  import build_vectorizer, build_model
 
 # ── Config ────────────────────────────────────────────────────────────────────
 TRAIN_PATH = os.getenv('TRAIN_PATH', 'data/train.csv')
@@ -12,7 +12,7 @@ TEST_PATH  = os.getenv('TEST_PATH',  'data/test.csv')
 MODEL_OUT  = os.getenv('MODEL_OUT',  'tfidf.pkl')
 WANDB_KEY  = os.getenv('WANDB_API_KEY', '')
 WANDB_PROJECT = 'smart-mcq-solver'
-WANDB_RUN     = 'tfidf-logreg-v1'
+WANDB_RUN     = 'tfidf-logreg-v2'
 TEST_SIZE  = 0.2
 RANDOM_STATE = 42
 # ──────────────────────────────────────────────────────────────────────────────
