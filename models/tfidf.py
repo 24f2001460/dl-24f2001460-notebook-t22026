@@ -14,18 +14,35 @@ from sklearn.linear_model import LogisticRegression
 #     return LogisticRegression(class_weight='balanced')
 
 
+# def build_vectorizer():
+#     return TfidfVectorizer(
+#         max_features=30000,
+#         ngram_range=(1,2),
+#         stop_words='english'
+#     )
+
+# def build_model():
+#     return LogisticRegression(
+#         class_weight='balanced',
+#         C=0.5,
+#         solver='liblinear',
+#         max_iter=1000,
+#         random_state=42
+#     )
+
+
 def build_vectorizer():
     return TfidfVectorizer(
-        max_features=30000,
-        ngram_range=(1,2),
+        max_features=40000,
+        ngram_range=(1,3),
         stop_words='english'
     )
 
 def build_model():
     return LogisticRegression(
         class_weight='balanced',
-        C=0.5,
-        solver='liblinear',
-        max_iter=1000,
+        C=2.0,
+        solver='saga',
+        max_iter=2000,
         random_state=42
     )
