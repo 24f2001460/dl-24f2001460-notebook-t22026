@@ -9,6 +9,8 @@ import wandb
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 
+from .scratch_utils import mapk , apk
+
 from .scratch_preprocess import (
     expand_train_rows,
     build_vocab,
@@ -20,21 +22,32 @@ from .scratch_preprocess import (
 from models.scratch import build_model
 
 # ── Config ────────────────────────────────────────────────────────────────────
-TRAIN_PATH = "..data/train.csv"
-TEST_PATH  = "..data/test.csv"
-TRAIN_PATH   = os.getenv('TRAIN_PATH',  '/kaggle/input/competitions/smart-mcq-solver-challenge/train.csv')
-TEST_PATH    = os.getenv('TEST_PATH',   '/kaggle/input/competitions/smart-mcq-solver-challenge/test.csv')
-MODEL_OUT    = os.getenv('MODEL_OUT',   '/kaggle/working/model.pt')
-VOCAB_OUT    = os.getenv('VOCAB_OUT',   '/kaggle/working/word2idx.pkl')
-WANDB_KEY    = os.getenv('WANDB_API_KEY', '')
-WANDB_PROJECT = 'smart-mcq-solver'
-WANDB_RUN     = 'cnn-bilstm-attention-v1'
+# TRAIN_PATH = "..data/train.csv"
+# TEST_PATH  = "..data/test.csv"
+# TRAIN_PATH   = os.getenv('TRAIN_PATH',  '/kaggle/input/competitions/smart-mcq-solver-challenge/train.csv')
+# TEST_PATH    = os.getenv('TEST_PATH',   '/kaggle/input/competitions/smart-mcq-solver-challenge/test.csv')
 
-EPOCHS       = 15
-BATCH_SIZE   = 64
-LR           = 1e-3
-WEIGHT_DECAY = 1e-5
-TEST_SIZE    = 0.2
+TRAIN_PATH =    os.getenv("TRAIN_PATH", "data/train.csv")
+TEST_PATH  =     os.getenv("TEST_PATH", "data/test.csv")
+MODEL_OUT    = os.getenv('MODEL_OUT',   'model.pt')
+VOCAB_OUT    = os.getenv('VOCAB_OUT',   'word2idx.pkl')
+WANDB_KEY    = os.getenv('WANDB_API_KEY', '')
+WANDB_PROJECT = '24f2001460-t22026'
+WANDB_RUN     = 'scratch_lstm_v2'
+
+# EPOCHS       = 15
+# BATCH_SIZE   = 64
+# LR           = 1e-3
+# WEIGHT_DECAY = 1e-5
+#TEST_SIZE    = 0.2
+#RANDOM_STATE = 42
+
+
+EPOCHS = 20
+BATCH_SIZE = 32
+LR = 5e-4
+WEIGHT_DECAY = 1e-4
+TEST_SIZE = 0.1
 RANDOM_STATE = 42
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -59,17 +72,35 @@ def train_one_epoch(model, loader, criterion, optimizer, device):
 
 def evaluate(model, loader, criterion, device):
     model.eval()
+
     total_loss, correct, total = 0.0, 0, 0
+    all_scores = []
+    all_labels = []
+
     with torch.no_grad():
         for X_batch, y_batch in loader:
             X_batch, y_batch = X_batch.to(device), y_batch.to(device)
-            outputs     = model(X_batch)
-            loss        = criterion(outputs, y_batch)
+
+            outputs = model(X_batch)
+            loss = criterion(outputs, y_batch)
+
             total_loss += loss.item()
-            preds       = (torch.sigmoid(outputs) > 0.5).float()
-            correct    += (preds == y_batch).sum().item()
-            total      += y_batch.size(0)
-    return total_loss, correct / total
+
+            probs = torch.sigmoid(outputs)
+
+            preds = (probs > 0.5).float()
+            correct += (preds == y_batch).sum().item()
+            total += y_batch.size(0)
+
+            all_scores.extend(probs.cpu().numpy())
+            all_labels.extend(y_batch.cpu().numpy())
+
+    # Convert probabilities to predicted labels
+    predicted_labels = [1 if s > 0.5 else 0 for s in all_scores]
+
+    map3 = mapk(all_labels, predicted_labels, k=3)
+
+    return total_loss, correct / total, map3
 
 
 def main():
@@ -134,21 +165,32 @@ def main():
 
     for epoch in range(EPOCHS):
         train_loss, train_acc = train_one_epoch(model, train_loader, criterion, optimizer, device)
-        val_loss,   val_acc   = evaluate(model, valid_loader, criterion, device)
+        val_loss, val_acc, val_map3 = evaluate(
+                                                model,
+                                                valid_loader,
+                                                criterion,
+                                                device,
+                                                )
         scheduler.step(val_acc)
 
         print(
-            f"Epoch {epoch+1:02d}"
-            f" | Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.4f}"
-            f" | Val Loss: {val_loss:.4f}   | Val Acc: {val_acc:.4f}"
-        )
+                f"Epoch {epoch+1:02d}"
+                f" | Train Loss: {train_loss:.4f}"
+                f" | Train Acc: {train_acc:.4f}"
+                f" | Val Loss: {val_loss:.4f}"
+                f" | Val Acc: {val_acc:.4f}"
+                f" | MAP@3: {val_map3:.4f}"
+            )
 
         wandb.log({
-            'epoch': epoch + 1,
-            'train_loss': train_loss, 'train_acc': train_acc,
-            'val_loss':   val_loss,   'val_acc':   val_acc,
-            'lr': optimizer.param_groups[0]['lr'],
-        })
+                'epoch': epoch + 1,
+                'train_loss': train_loss,
+                'train_acc': train_acc,
+                'val_loss': val_loss,
+                'val_acc': val_acc,
+                'val_map@3': val_map3,
+                'lr': optimizer.param_groups[0]['lr'],
+            })
 
         if val_acc > best_val_acc:
             best_val_acc = val_acc
