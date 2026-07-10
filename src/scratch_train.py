@@ -33,7 +33,7 @@ MODEL_OUT    = os.getenv('MODEL_OUT',   'model.pt')
 VOCAB_OUT    = os.getenv('VOCAB_OUT',   'word2idx.pkl')
 WANDB_KEY    = os.getenv('WANDB_API_KEY', '')
 WANDB_PROJECT = '24f2001460-t22026'
-WANDB_RUN     = 'scratch_lstm_v2'
+WANDB_RUN     = 'scratch_lstm_v3'
 
 # EPOCHS       = 15
 # BATCH_SIZE   = 64
@@ -43,12 +43,20 @@ WANDB_RUN     = 'scratch_lstm_v2'
 #RANDOM_STATE = 42
 
 
-EPOCHS = 20
-BATCH_SIZE = 32
-LR = 5e-4
-WEIGHT_DECAY = 1e-4
-TEST_SIZE = 0.1
+# EPOCHS = 20
+# BATCH_SIZE = 32
+# LR = 5e-4
+# WEIGHT_DECAY = 1e-4
+# TEST_SIZE = 0.1
+# RANDOM_STATE = 42
+
+EPOCHS = 25
+BATCH_SIZE = 16
+LR = 2e-4
+WEIGHT_DECAY = 5e-5
+TEST_SIZE = 0.15
 RANDOM_STATE = 42
+
 # ──────────────────────────────────────────────────────────────────────────────
 
 
