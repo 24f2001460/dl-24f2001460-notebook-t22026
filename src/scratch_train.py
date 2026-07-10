@@ -24,11 +24,9 @@ from models.scratch import build_model
 # ── Config ────────────────────────────────────────────────────────────────────
 # TRAIN_PATH = "..data/train.csv"
 # TEST_PATH  = "..data/test.csv"
-# TRAIN_PATH   = os.getenv('TRAIN_PATH',  '/kaggle/input/competitions/smart-mcq-solver-challenge/train.csv')
-# TEST_PATH    = os.getenv('TEST_PATH',   '/kaggle/input/competitions/smart-mcq-solver-challenge/test.csv')
+TRAIN_PATH   = os.getenv('TRAIN_PATH',  '/kaggle/input/competitions/smart-mcq-solver-challenge/train.csv')
+TEST_PATH    = os.getenv('TEST_PATH',   '/kaggle/input/competitions/smart-mcq-solver-challenge/test.csv')
 
-TRAIN_PATH =    os.getenv("TRAIN_PATH", "data/train.csv")
-TEST_PATH  =     os.getenv("TEST_PATH", "data/test.csv")
 MODEL_OUT    = os.getenv('MODEL_OUT',   'model.pt')
 VOCAB_OUT    = os.getenv('VOCAB_OUT',   'word2idx.pkl')
 WANDB_KEY    = os.getenv('WANDB_API_KEY', '')
