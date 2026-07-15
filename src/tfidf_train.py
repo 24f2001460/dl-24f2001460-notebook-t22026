@@ -23,8 +23,8 @@ TEST_PATH = os.getenv("TEST_PATH", "data/test.csv")
 MODEL_OUT = os.getenv("MODEL_OUT", "tfidf.pkl")
 
 WANDB_KEY = os.getenv("WANDB_API_KEY", "")
-WANDB_PROJECT = "smart-mcq-solver"
-WANDB_RUN = "tfidf-logreg-v3"
+WANDB_PROJECT = "24f2001460-t22026"
+WANDB_RUN = "tfidf-logreg-v4"
 
 TEST_SIZE = 0.2
 RANDOM_STATE = 42
