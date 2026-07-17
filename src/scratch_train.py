@@ -59,7 +59,7 @@ EPOCHS = 35
 BATCH_SIZE = 64
 LR = 0.1
 WEIGHT_DECAY = 0.2
-MAX_LEN = 384
+MAX_LEN = 512
 TEST_SIZE = 0.10
 RANDOM_STATE = 42
 # ──────────────────────────────────────────────────────────────────────────────
