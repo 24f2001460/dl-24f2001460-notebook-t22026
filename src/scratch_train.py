@@ -55,14 +55,13 @@ WANDB_RUN     = 'scratch_lstm_v4'
 # TEST_SIZE = 0.15
 # RANDOM_STATE = 42
 
-EPOCHS = 30
-BATCH_SIZE = 32
-LR = 3e-5
-WEIGHT_DECAY = 2e-4
-MAX_LEN = 256
+EPOCHS = 35
+BATCH_SIZE = 16
+LR = 2e-5
+WEIGHT_DECAY = 1e-4
+MAX_LEN = 384
 TEST_SIZE = 0.10
 RANDOM_STATE = 42
-
 # ──────────────────────────────────────────────────────────────────────────────
 
 
