@@ -8,8 +8,8 @@ from transformers import AutoModelForCausalLM
 from peft import PeftModel
 
 from models.pretrained      import load_tokenizer, MODEL_NAME
-from pretrained_preprocess import build_prompt, OPTIONS
-from pretrained_utils      import get_option_ids_tensor
+from .pretrained_preprocess import build_prompt, OPTIONS
+from .pretrained_utils      import get_option_ids_tensor
 
 
 

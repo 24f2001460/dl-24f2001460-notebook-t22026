@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from pretrained_preprocess import OPTIONS
+from .pretrained_preprocess import OPTIONS
 
 
 def get_option_token_ids(tokenizer) -> dict:

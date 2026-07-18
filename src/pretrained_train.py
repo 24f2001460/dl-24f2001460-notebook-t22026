@@ -9,7 +9,7 @@ from transformers import (
 )
 
 from models.pretrained   import build_model_and_tokenizer, MODEL_NAME
-from pretrained_preprocess import make_hf_datasets, MAX_LEN
+from .pretrained_preprocess import make_hf_datasets, MAX_LEN
 
 # ── Config ────────────────────────────────────────────────────────────────────
 TRAIN_PATH    = os.getenv("TRAIN_PATH",   "/kaggle/input/competitions/smart-mcq-solver-challenge/train.csv")
