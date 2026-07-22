@@ -12,8 +12,7 @@ from models.pretrained   import build_model_and_tokenizer, MODEL_NAME
 from .pretrained_preprocess import make_hf_datasets, MAX_LEN
 
 # ── Config ────────────────────────────────────────────────────────────────────
-# TRAIN_PATH    = os.getenv("TRAIN_PATH",   "/kaggle/input/competitions/smart-mcq-solver-challenge/train.csv")
-TRAIN_PATH    = os.getenv("TRAIN_PATH",   "..data/train.csv")
+TRAIN_PATH    = os.getenv("TRAIN_PATH",   "/kaggle/input/competitions/smart-mcq-solver-challenge/train.csv")
 OUTPUT_DIR    = os.getenv("OUTPUT_DIR",   "/kaggle/working/mcq_qwen_output")
 WANDB_PROJECT = "24f2001460-t22026"
 WANDB_RUN     = "qwen2.5-7b-qlora-mc__2"
