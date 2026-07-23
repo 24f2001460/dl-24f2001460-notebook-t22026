@@ -10,40 +10,23 @@ from transformers import (
 
 from models.pretrained   import build_model_and_tokenizer, MODEL_NAME
 from .pretrained_preprocess import make_hf_datasets, MAX_LEN
+from .pretrained_utils import build_compute_metrics, build_preprocess_logits_for_metrics
 
 # ── Config ────────────────────────────────────────────────────────────────────
 TRAIN_PATH    = os.getenv("TRAIN_PATH",   "/kaggle/input/competitions/smart-mcq-solver-challenge/train.csv")
 OUTPUT_DIR    = os.getenv("OUTPUT_DIR",   "/kaggle/working/mcq_qwen_output")
 WANDB_PROJECT = "24f2001460-t22026"
-WANDB_RUN     = "qwen2.5-7b-qlora-mc__3"
+WANDB_RUN     = "qwen2.5-7b-qlora-mc__new"
 
-# EPOCHS        = 3
-# LR            = 2e-4
-# BATCH_SIZE    = 1
-# GRAD_ACCUM    = 16
-# WEIGHT_DECAY  = 0.01
-# WARMUP_RATIO  = 0.05
-# VAL_SIZE      = 0.1
-# SEED          = 42
-
-# EPOCHS        = 4
-# LR            = 1e-4
-# BATCH_SIZE    = 1
-# GRAD_ACCUM    = 32
-# WEIGHT_DECAY  = 0.05
-# WARMUP_RATIO  = 0.10
-# VAL_SIZE      = 0.1
-# SEED          = 42
-
-EPOCHS        = 5
-LR            = 8e-5
+EPOCHS        = 3
+LR            = 2e-4
 BATCH_SIZE    = 1
-GRAD_ACCUM    = 32
-WEIGHT_DECAY  = 0.05
-WARMUP_RATIO  = 0.10
+GRAD_ACCUM    = 16
+WEIGHT_DECAY  = 0.01
+WARMUP_RATIO  = 0.05
 VAL_SIZE      = 0.1
 SEED          = 42
-# ──────────────────────────────────────────────────────────────────────────────
+
 
 
 def get_wandb_key() -> str:
@@ -111,9 +94,11 @@ def main():
         model=model,
         args=training_args,
         train_dataset=train_ds,
-        eval_dataset=val_ds,
+        eval_dataset={"val": val_ds, "train": train_ds},
         processing_class=tokenizer,
         data_collator=data_collator,
+        compute_metrics=build_compute_metrics(tokenizer),
+        preprocess_logits_for_metrics=build_preprocess_logits_for_metrics(tokenizer),
     )
 
     print("Starting training...")
