@@ -47,6 +47,12 @@ def preprocess_train(examples: dict, tokenizer, max_len: int = MAX_LEN) -> dict:
     }
 
 
+def _has_valid_label(example) -> bool:
+    """Drop rows where truncation ate the entire answer, leaving all
+    labels as -100 — these produce NaN loss/undefined metrics in eval."""
+    return any(l != -100 for l in example["labels"])
+
+
 def make_hf_datasets(train_df, tokenizer, test_size: float = 0.1, seed: int = 42,
                      max_len: int = MAX_LEN):
     hf_dataset = Dataset.from_pandas(train_df)
@@ -55,6 +61,14 @@ def make_hf_datasets(train_df, tokenizer, test_size: float = 0.1, seed: int = 42
         batched=True,
         remove_columns=train_df.columns.tolist(),
     )
+
+    before = len(hf_dataset)
+    hf_dataset = hf_dataset.filter(_has_valid_label)
+    dropped = before - len(hf_dataset)
+    if dropped:
+        print(f"[make_hf_datasets] Dropped {dropped}/{before} rows "
+              f"whose answer was fully truncated (labels all -100).")
+
     split    = hf_dataset.train_test_split(test_size=test_size, seed=seed)
     train_ds = split["train"]
     val_ds   = split["test"]

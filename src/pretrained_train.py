@@ -16,16 +16,18 @@ from .pretrained_utils import build_compute_metrics, build_preprocess_logits_for
 TRAIN_PATH    = os.getenv("TRAIN_PATH",   "/kaggle/input/competitions/smart-mcq-solver-challenge/train.csv")
 OUTPUT_DIR    = os.getenv("OUTPUT_DIR",   "/kaggle/working/mcq_qwen_output")
 WANDB_PROJECT = "24f2001460-t22026"
-WANDB_RUN     = "qwen2.5-7b-qlora-mc__new"
+WANDB_RUN     = "qwen2.5-7b-qlora-mc__new1"
 
 EPOCHS        = 3
-LR            = 2e-4
+LR            = 1e-4      
 BATCH_SIZE    = 1
 GRAD_ACCUM    = 16
 WEIGHT_DECAY  = 0.01
-WARMUP_RATIO  = 0.05
+WARMUP_RATIO  = 0.1       
 VAL_SIZE      = 0.1
 SEED          = 42
+
+EVAL_STEPS    = 20        
 
 
 
@@ -72,8 +74,10 @@ def main():
     # ── Training Args ─────────────────────────────────────────────────────────
     training_args = TrainingArguments(
         output_dir=OUTPUT_DIR,
-        eval_strategy="epoch",
-        save_strategy="epoch",
+        eval_strategy="steps",          
+        eval_steps=EVAL_STEPS,
+        save_strategy="steps",          
+        save_steps=EVAL_STEPS,
         learning_rate=LR,
         per_device_train_batch_size=BATCH_SIZE,
         per_device_eval_batch_size=BATCH_SIZE,
@@ -81,12 +85,15 @@ def main():
         num_train_epochs=EPOCHS,
         weight_decay=WEIGHT_DECAY,
         warmup_ratio=WARMUP_RATIO,
+        max_grad_norm=1.0,              
         bf16=True,
         optim="paged_adamw_8bit",
         report_to="wandb",
         logging_steps=10,
-        save_total_limit=1,
+        save_total_limit=2,
         load_best_model_at_end=True,
+        metric_for_best_model="map@3",  
+        greater_is_better=True,
     )
 
     # ── Trainer ───────────────────────────────────────────────────────────────
@@ -102,10 +109,14 @@ def main():
     )
 
     print("Starting training...")
-    trainer.train()
-
-    print(f"Training complete. Adapter saved to: {OUTPUT_DIR}")
-    wandb.finish()
+    try:
+        trainer.train()
+    except Exception as e:
+        print(f"Training stopped early: {e}")
+        raise
+    finally:
+        print(f"Training complete (or halted). Adapter saved to: {OUTPUT_DIR}")
+        wandb.finish()
 
 
 if __name__ == "__main__":
