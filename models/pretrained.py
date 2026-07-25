@@ -1,4 +1,5 @@
 import torch
+from typing import Any
 from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
@@ -9,17 +10,17 @@ from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 # ── Defaults ──────────────────────────────────────────────────────────────────
 MODEL_NAME = "Qwen/Qwen2.5-7B-Instruct"
 
-LORA_CONFIG = dict(
-    r=16,
-    lora_alpha=32,
-    lora_dropout=0.05,
-    bias="none",
-    task_type="CAUSAL_LM",
-    target_modules=[
+LORA_CONFIG: dict[str, Any] = {
+    "r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "bias": "none",
+    "task_type": "CAUSAL_LM",
+    "target_modules": [
         "q_proj", "k_proj", "v_proj", "o_proj",
         "gate_proj", "up_proj", "down_proj",
     ],
-)
+}
 # ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -53,7 +54,7 @@ def load_base_model(model_name: str = MODEL_NAME):
     return model
 
 
-def apply_lora(model, lora_cfg: dict = None):
+def apply_lora(model, lora_cfg: dict[str, Any] | None = None):
 
     cfg = lora_cfg or LORA_CONFIG
     lora_config = LoraConfig(**cfg)

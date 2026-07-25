@@ -13,10 +13,34 @@ from .pretrained_preprocess import make_hf_datasets, MAX_LEN
 from .pretrained_utils import build_compute_metrics, build_preprocess_logits_for_metrics
 
 # ── Config ────────────────────────────────────────────────────────────────────
-TRAIN_PATH    = os.getenv("TRAIN_PATH",   "/kaggle/input/competitions/smart-mcq-solver-challenge/train.csv")
-OUTPUT_DIR    = os.getenv("OUTPUT_DIR",   "/kaggle/working/mcq_qwen_output")
+def resolve_train_path() -> str:
+    env_path = os.getenv("TRAIN_PATH")
+    if env_path:
+        return env_path
+    candidates = [
+        "train.csv",
+        "data/train.csv",
+        "src/train.csv",
+        "../train.csv",
+        "/kaggle/input/competitions/smart-mcq-solver-challenge/train.csv"
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            return c
+    return "/kaggle/input/competitions/smart-mcq-solver-challenge/train.csv"
+
+def resolve_output_dir() -> str:
+    env_path = os.getenv("OUTPUT_DIR")
+    if env_path:
+        return env_path
+    if os.path.exists("/kaggle/working"):
+        return "/kaggle/working/mcq_qwen_output"
+    return "mcq_qwen_output"
+
+TRAIN_PATH    = resolve_train_path()
+OUTPUT_DIR    = resolve_output_dir()
 WANDB_PROJECT = "24f2001460-t22026"
-WANDB_RUN     = "qwen2.5-7b-qlora-mc__new1"
+WANDB_RUN     = "qwen2.5-7b-qlora-mc__new2"
 
 EPOCHS        = 3
 LR            = 1e-4      
@@ -34,7 +58,7 @@ EVAL_STEPS    = 20
 def get_wandb_key() -> str:
 
     try:
-        from kaggle_secrets import UserSecretsClient
+        from kaggle_secrets import UserSecretsClient  # type: ignore
         return UserSecretsClient().get_secret("wandb_key")
     except Exception:
         return os.environ.get("wandb_key", "")
@@ -101,7 +125,7 @@ def main():
         model=model,
         args=training_args,
         train_dataset=train_ds,
-        eval_dataset={"val": val_ds, "train": train_ds},
+        eval_dataset=val_ds,
         processing_class=tokenizer,
         data_collator=data_collator,
         compute_metrics=build_compute_metrics(tokenizer),

@@ -6,7 +6,7 @@ MAX_LEN = 512
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-def build_prompt(row: dict) -> str:
+def build_prompt(row) -> str:
     return (
         f"Question: {row['prompt']}\n"
         f"A. {row['A']}\n"

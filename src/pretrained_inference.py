@@ -29,7 +29,7 @@ def load_model_for_inference(adapter_path: str, model_name: str = MODEL_NAME, de
     return tokenizer, model
 
 
-def predict_top3(row: dict, tokenizer, model, option_ids_tensor: torch.Tensor) -> str:
+def predict_top3(row, tokenizer, model, option_ids_tensor: torch.Tensor) -> str:
     prompt = build_prompt(row) + " "
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
@@ -42,11 +42,35 @@ def predict_top3(row: dict, tokenizer, model, option_ids_tensor: torch.Tensor) -
     return " ".join(OPTIONS[i] for i in top3_idx)
 
 
+def resolve_inference_paths():
+    test_candidates = [
+        "test.csv",
+        "data/test.csv",
+        "src/test.csv",
+        "../test.csv",
+        "/kaggle/input/competitions/smart-mcq-solver-challenge/test.csv"
+    ]
+    test_path = next((c for c in test_candidates if os.path.exists(c)), "/kaggle/input/competitions/smart-mcq-solver-challenge/test.csv")
+
+    adapter_candidates = [
+        "mcq_qwen_output",
+        "../mcq_qwen_output",
+        "/kaggle/working/mcq_qwen_output"
+    ]
+    adapter_path = next((c for c in adapter_candidates if os.path.exists(c)), "mcq_qwen_output")
+
+    output_path = "/kaggle/working/submission.csv" if os.path.exists("/kaggle/working") else "submission.csv"
+    
+    return test_path, adapter_path, output_path
+
+
 def main():
+    default_test, default_adapter, default_output = resolve_inference_paths()
+
     parser = argparse.ArgumentParser(description="Qwen2.5 QLoRA inference")
-    parser.add_argument("--test_path",    default="/kaggle/input/competitions/smart-mcq-solver-challenge/test.csv")
-    parser.add_argument("--adapter_path", default="/kaggle/input/<your-dataset>/mcq_qwen_output")
-    parser.add_argument("--output_path",  default="/kaggle/working/submission.csv")
+    parser.add_argument("--test_path",    default=default_test)
+    parser.add_argument("--adapter_path", default=default_adapter)
+    parser.add_argument("--output_path",  default=default_output)
     parser.add_argument("--model_name",   default=MODEL_NAME)
     args = parser.parse_args()
 
@@ -73,7 +97,7 @@ def main():
 
     # ── Validation ────────────────────────────────────────────────────────────
     assert list(submission.columns) == ["ID", "Prediction"], "Column name mismatch!"
-    assert submission["Prediction"].apply(lambda x: len(x.split()) == 3).all(), \
+    assert bool(submission["Prediction"].apply(lambda x: len(x.split()) == 3).all()), \
         "Some rows don't have exactly 3 predictions!"
     print("\n✓ Submission format validated.")
 
